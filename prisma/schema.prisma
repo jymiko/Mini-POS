@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("kasir") // superadmin, produksi, kasir
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]  @relation("OrderCreatedBy")
+}
+
+model Material {
+  id            String         @id @default(cuid())
+  name          String
+  unit          String         // gram, ml, pcs, etc
+  stock         Float          @default(0)
+  minStock      Float          @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  menuMaterials MenuMaterial[]
+}
+
+model Menu {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  image         String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  menuMaterials MenuMaterial[]
+  orderItems    OrderItem[]
+}
+
+model MenuMaterial {
+  id         String   @id @default(cuid())
+  menuId     String
+  materialId String
+  quantity   Float    // berapa banyak material yang dibutuhkan
+  menu       Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([menuId, materialId])
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  orderNo      String      @unique
+  customerName String?     // untuk self-order
+  totalPrice   Float
+  status       String      @default("pending") // pending, completed, cancelled
+  type         String      @default("cashier") // cashier or self-order
+  createdById  String?
+  createdBy    User?       @relation("OrderCreatedBy", fields: [createdById], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderItems   OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  menuId    String
+  quantity  Int
+  price     Float
+  subtotal  Float
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
