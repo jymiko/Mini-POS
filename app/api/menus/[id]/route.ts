@@ -56,6 +56,14 @@ export async function PUT(
     const body = await request.json()
     const { name, description, price, materials, isActive } = body
 
+    // Validasi: menu harus memiliki minimal 1 bahan
+    if (!materials || !Array.isArray(materials) || materials.length === 0) {
+      return NextResponse.json(
+        { error: 'Menu harus memiliki minimal 1 bahan' },
+        { status: 400 }
+      )
+    }
+
     await prisma.menuMaterial.deleteMany({
       where: { menuId: id },
     })

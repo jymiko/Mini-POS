@@ -148,6 +148,12 @@ export default function MenusPage() {
         quantity: parseFloat(m.quantity),
       }))
 
+    // Validasi: menu harus memiliki minimal 1 bahan
+    if (materialsData.length === 0) {
+      toast.error('Menu harus memiliki minimal 1 bahan')
+      return
+    }
+
     const menuData = {
       ...formData,
       materials: materialsData,
@@ -454,7 +460,7 @@ export default function MenusPage() {
 
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center mb-4">
-                  <Label>Bahan yang Dibutuhkan</Label>
+                  <Label>Bahan yang Dibutuhkan *</Label>
                   <Button type="button" size="sm" onClick={addMaterial}>
                     <Plus className="h-4 w-4 mr-1" />
                     Tambah Bahan

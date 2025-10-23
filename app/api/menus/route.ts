@@ -27,6 +27,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validasi: menu harus memiliki minimal 1 bahan
+    if (!materials || !Array.isArray(materials) || materials.length === 0) {
+      return NextResponse.json(
+        { error: 'Menu harus memiliki minimal 1 bahan' },
+        { status: 400 }
+      )
+    }
+
     const menu = await prisma.menu.create({
       data: {
         name,
