@@ -122,24 +122,13 @@ export default function ReportsPage() {
                     {startDate ? format(startDate, 'PPP', { locale: localeId }) : 'Pilih tanggal'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 flex justify-center items-center" align="center">
+                <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={startDate}
                     onSelect={setStartDate}
                     initialFocus
                     locale={localeId}
-                    className="px-3 py-2"
-                    classNames={{
-                      months: "",
-                      month: "space-y-2",
-                      table: "border-collapse",
-                      head_row: "flex justify-between",
-                      head_cell: "flex-1 text-center font-normal text-sm",
-                      row: "flex justify-between",
-                      cell: "flex-1 text-center p-0",
-                      day: "w-full h-full p-2"
-                    }}
                   />
                 </PopoverContent>
               </Popover>
@@ -159,7 +148,7 @@ export default function ReportsPage() {
                     {endDate ? format(endDate, 'PPP', { locale: localeId }) : 'Pilih tanggal'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 flex justify-center items-center" align="center">
+                <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={endDate}
@@ -167,17 +156,6 @@ export default function ReportsPage() {
                     initialFocus
                     locale={localeId}
                     disabled={(date) => startDate ? date < startDate : false}
-                    className="px-3 py-2"
-                    classNames={{
-                      months: "",
-                      month: "space-y-2",
-                      table: "border-collapse",
-                      head_row: "flex justify-between",
-                      head_cell: "flex-1 text-center font-normal text-sm",
-                      row: "flex justify-between",
-                      cell: "flex-1 text-center p-0",
-                      day: "w-full h-full p-2"
-                    }}
                   />
                 </PopoverContent>
               </Popover>

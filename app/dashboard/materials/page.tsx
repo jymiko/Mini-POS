@@ -41,6 +41,12 @@ export default function MaterialsPage() {
     stock: '',
     minStock: '',
   })
+  const [errors, setErrors] = useState({
+    name: '',
+    unit: '',
+    stock: '',
+    minStock: '',
+  })
 
   const debouncedSearch = useDebounce(searchQuery, 300)
 
@@ -92,11 +98,49 @@ export default function MaterialsPage() {
       setSelectedMaterial(null)
       setFormData({ name: '', unit: '', stock: '', minStock: '' })
     }
+    setErrors({ name: '', unit: '', stock: '', minStock: '' })
     setIsDialogOpen(true)
+  }
+
+  const validateForm = () => {
+    const newErrors = {
+      name: '',
+      unit: '',
+      stock: '',
+      minStock: '',
+    }
+    let isValid = true
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Nama material harus diisi'
+      isValid = false
+    }
+
+    if (!formData.unit.trim()) {
+      newErrors.unit = 'Satuan harus diisi'
+      isValid = false
+    }
+
+    if (!formData.stock || isNaN(Number(formData.stock)) || Number(formData.stock) < 0) {
+      newErrors.stock = 'Stock harus berupa angka valid (minimal 0)'
+      isValid = false
+    }
+
+    if (!formData.minStock || isNaN(Number(formData.minStock)) || Number(formData.minStock) < 0) {
+      newErrors.minStock = 'Minimal stock harus berupa angka valid (minimal 0)'
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
 
     if (selectedMaterial) {
       updateMaterial.mutate(
@@ -319,11 +363,15 @@ export default function MaterialsPage() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
+                    if (errors.name) setErrors({ ...errors, name: '' })
+                  }}
+                  className={errors.name ? 'border-red-500' : ''}
                 />
+                {errors.name && (
+                  <p className="text-sm text-red-600 mt-1">{errors.name}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="unit">Satuan *</Label>
@@ -331,11 +379,15 @@ export default function MaterialsPage() {
                   id="unit"
                   placeholder="gram, ml, pcs, etc"
                   value={formData.unit}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({ ...formData, unit: e.target.value })
-                  }
-                  required
+                    if (errors.unit) setErrors({ ...errors, unit: '' })
+                  }}
+                  className={errors.unit ? 'border-red-500' : ''}
                 />
+                {errors.unit && (
+                  <p className="text-sm text-red-600 mt-1">{errors.unit}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="stock">Stock *</Label>
@@ -344,11 +396,15 @@ export default function MaterialsPage() {
                   type="number"
                   step="0.01"
                   value={formData.stock}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({ ...formData, stock: e.target.value })
-                  }
-                  required
+                    if (errors.stock) setErrors({ ...errors, stock: '' })
+                  }}
+                  className={errors.stock ? 'border-red-500' : ''}
                 />
+                {errors.stock && (
+                  <p className="text-sm text-red-600 mt-1">{errors.stock}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="minStock">Minimal Stock *</Label>
@@ -357,11 +413,15 @@ export default function MaterialsPage() {
                   type="number"
                   step="0.01"
                   value={formData.minStock}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({ ...formData, minStock: e.target.value })
-                  }
-                  required
+                    if (errors.minStock) setErrors({ ...errors, minStock: '' })
+                  }}
+                  className={errors.minStock ? 'border-red-500' : ''}
                 />
+                {errors.minStock && (
+                  <p className="text-sm text-red-600 mt-1">{errors.minStock}</p>
+                )}
               </div>
             </div>
             <DialogFooter className="mt-6">

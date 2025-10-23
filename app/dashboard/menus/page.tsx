@@ -56,6 +56,11 @@ export default function MenusPage() {
     isActive: true,
   })
   const [selectedMaterials, setSelectedMaterials] = useState<MaterialInput[]>([])
+  const [errors, setErrors] = useState({
+    name: '',
+    price: '',
+    materials: '',
+  })
 
   const debouncedSearch = useDebounce(searchQuery, 300)
 
@@ -121,11 +126,41 @@ export default function MenusPage() {
       setFormData({ name: '', description: '', price: '', isActive: true })
       setSelectedMaterials([])
     }
+    setErrors({ name: '', price: '', materials: '' })
     setIsDialogOpen(true)
+  }
+
+  const validateForm = () => {
+    const newErrors = {
+      name: '',
+      price: '',
+      materials: '',
+    }
+    let isValid = true
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Nama menu harus diisi'
+      isValid = false
+    }
+
+    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      newErrors.price = 'Harga harus berupa angka valid (lebih dari 0)'
+      isValid = false
+    }
+
+    const validMaterials = selectedMaterials.filter((m) => m.materialId && m.quantity)
+    if (validMaterials.length === 0) {
+      newErrors.materials = 'Menu harus memiliki minimal 1 bahan'
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
   }
 
   const addMaterial = () => {
     setSelectedMaterials([...selectedMaterials, { materialId: '', quantity: '' }])
+    if (errors.materials) setErrors({ ...errors, materials: '' })
   }
 
   const removeMaterial = (index: number) => {
@@ -136,10 +171,15 @@ export default function MenusPage() {
     const updated = [...selectedMaterials]
     updated[index][field] = value
     setSelectedMaterials(updated)
+    if (errors.materials) setErrors({ ...errors, materials: '' })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
 
     const materialsData = selectedMaterials
       .filter((m) => m.materialId && m.quantity)
@@ -147,12 +187,6 @@ export default function MenusPage() {
         materialId: m.materialId,
         quantity: parseFloat(m.quantity),
       }))
-
-    // Validasi: menu harus memiliki minimal 1 bahan
-    if (materialsData.length === 0) {
-      toast.error('Menu harus memiliki minimal 1 bahan')
-      return
-    }
 
     const menuData = {
       ...formData,
@@ -416,11 +450,15 @@ export default function MenusPage() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
+                    if (errors.name) setErrors({ ...errors, name: '' })
+                  }}
+                  className={errors.name ? 'border-red-500' : ''}
                 />
+                {errors.name && (
+                  <p className="text-sm text-red-600 mt-1">{errors.name}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="description">Deskripsi</Label>
@@ -439,11 +477,15 @@ export default function MenusPage() {
                   type="number"
                   step="100"
                   value={formData.price}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({ ...formData, price: e.target.value })
-                  }
-                  required
+                    if (errors.price) setErrors({ ...errors, price: '' })
+                  }}
+                  className={errors.price ? 'border-red-500' : ''}
                 />
+                {errors.price && (
+                  <p className="text-sm text-red-600 mt-1">{errors.price}</p>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -517,6 +559,9 @@ export default function MenusPage() {
                     </p>
                   )}
                 </div>
+                {errors.materials && (
+                  <p className="text-sm text-red-600 mt-2">{errors.materials}</p>
+                )}
               </div>
             </div>
             <DialogFooter className="mt-6">
